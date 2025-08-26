@@ -1,78 +1,62 @@
-from flask import Flask, render_template, request, jsonify, send_file
+from flask import Flask, render_template, request
 import yt_dlp
 import os
 
 app = Flask(__name__)
 
-DOWNLOAD_FOLDER = os.path.join(os.getcwd(), "downloads")
-os.makedirs(DOWNLOAD_FOLDER, exist_ok=True)
+# Phone's Downloads folder
+DOWNLOAD_FOLDER = os.path.expanduser('~/storage/downloads')
+
+# Cookies files for different platforms
+COOKIES = {
+    "youtube.com": "cookies/youtube.txt",
+    "youtu.be": "cookies/youtube.txt",
+    "facebook.com": "cookies/fb.txt",
+    "fb.watch": "cookies/fb.txt",
+    "instagram.com": "cookies/ig.txt",
+    "tiktok.com": "cookies/tiktok.txt"
+}
+
+def get_cookie_file(url):
+    for domain, path in COOKIES.items():
+        if domain in url:
+            return path
+    return None
 
 @app.route('/')
 def index():
-    return render_template("index.html")
+    return render_template('index.html')
 
 @app.route('/download', methods=['POST'])
 def download():
     url = request.form.get('url', '').strip()
     if not url:
-        return jsonify({"error": "No URL provided"}), 400
+        return '❌ No URL provided', 400
+
+    # File name format: video title + id
+    outtmpl = os.path.join(DOWNLOAD_FOLDER, '%(title).80s-%(id)s.%(ext)s')
+
+    # Get correct cookie file based on URL
+    cookie_file = get_cookie_file(url)
 
     ydl_opts = {
-        "quiet": True,
-        "skip_download": True,
-        "format": "best",
+        'format': 'bv*+ba/b',
+        'outtmpl': outtmpl,
+        'merge_output_format': 'mp4',
+        'noplaylist': True,
+        'restrictfilenames': True
     }
+
+    if cookie_file and os.path.exists(cookie_file):
+        ydl_opts['cookiefile'] = cookie_file
 
     try:
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-            info = ydl.extract_info(url, download=False)
+            ydl.download([url])
 
-        formats = []
-        for f in info.get("formats", []):
-            if f.get("filesize"):
-                formats.append({
-                    "format_id": f.get("format_id"),
-                    "resolution": f.get("format_note") or f.get("height"),
-                    "ext": f.get("ext"),
-                    "filesize": round(f.get("filesize") / (1024*1024), 2)  # MB
-                })
-
-        return jsonify({
-            "title": info.get("title"),
-            "thumbnail": info.get("thumbnail"),
-            "url": url,
-            "formats": formats
-        })
-
+        return f"✅ Download complete! File is available in: {DOWNLOAD_FOLDER}"
     except Exception as e:
-        return jsonify({"error": str(e)}), 500
+        return f"❌ Error: {e}", 500
 
-
-@app.route('/download_file', methods=['POST'])
-def download_file():
-    url = request.form.get('url')
-    format_id = request.form.get('format_id')
-
-    if not url or not format_id:
-        return jsonify({"error": "Missing parameters"}), 400
-
-    outtmpl = os.path.join(DOWNLOAD_FOLDER, "%(title).80s.%(ext)s")
-    ydl_opts = {
-        "format": format_id,
-        "outtmpl": outtmpl,
-        "merge_output_format": "mp4"
-    }
-
-    try:
-        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-            info = ydl.extract_info(url, download=True)
-            filename = ydl.prepare_filename(info)
-
-        return send_file(filename, as_attachment=True)
-
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
-
-
-if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=5000, debug=True)
+if __name__ == '__main__':
+    app.run(host='0.0.0.0', port=5000)
