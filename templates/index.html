@@ -6,53 +6,158 @@
   <title>DanyVideo - Free Online Video Downloader</title>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
   <style>
-    body { font-family: 'Poppins', sans-serif; background: #f9f9f9; margin: 0; padding: 0; text-align: center; }
-    header { background: linear-gradient(90deg, #4cafef, #00c896); color: white; padding: 20px; font-size: 1.5rem; font-weight: 600; box-shadow: 0 2px 6px rgba(0,0,0,0.2); }
-    .container { margin-top: 50px; }
-    input[type=text] { width: 60%; padding: 15px; font-size: 1rem; border: 2px solid #4cafef; border-radius: 50px; outline: none; transition: 0.3s; }
-    input[type=text]:focus { border-color: #00c896; }
-    button { padding: 15px 30px; margin-left: 10px; background: #00c896; color: white; border: none; border-radius: 50px; font-size: 1rem; cursor: pointer; transition: 0.3s; }
-    button:hover { background: #009f78; transform: scale(1.05); }
-    .platforms { margin-top: 40px; display: flex; justify-content: center; gap: 20px; flex-wrap: wrap; }
-    .platform { width: 100px; height: 100px; background: white; border-radius: 20px; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 6px rgba(0,0,0,0.15); transition: 0.3s; cursor: pointer; }
-    .platform:hover { transform: translateY(-8px) scale(1.05); box-shadow: 0 4px 12px rgba(0,0,0,0.25); }
-    .platform img { width: 50px; height: 50px; animation: bounce 2s infinite; }
-    @keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
-    footer { margin-top: 60px; padding: 20px; background: #333; color: #aaa; font-size: 0.9rem; }
-    footer a { color: #00c896; text-decoration: none; margin: 0 10px; }
-
-    /* video info */
-    #videoInfo { margin-top: 40px; display:none; }
-    #videoInfo img { border-radius: 12px; margin: 15px 0; }
-    .download-btn { display:block; margin:10px auto; padding:12px 25px; border-radius:40px; background:#4cafef; color:#fff; text-decoration:none; width:250px; transition:0.3s; }
-    .download-btn:hover { background:#00c896; transform:scale(1.05); }
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: #f9f9f9;
+      margin: 0;
+      padding: 0;
+      text-align: center;
+    }
+    header {
+      background: linear-gradient(90deg, #4cafef, #00c896);
+      color: white;
+      padding: 20px;
+      font-size: 1.5rem;
+      font-weight: 600;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+    }
+    .container {
+      margin-top: 50px;
+    }
+    input[type=text] {
+      width: 60%;
+      padding: 15px;
+      font-size: 1rem;
+      border: 2px solid #4cafef;
+      border-radius: 50px;
+      outline: none;
+      transition: 0.3s;
+    }
+    input[type=text]:focus {
+      border-color: #00c896;
+    }
+    button {
+      padding: 15px 30px;
+      margin-left: 10px;
+      background: #00c896;
+      color: white;
+      border: none;
+      border-radius: 50px;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+    button:hover {
+      background: #009f78;
+      transform: scale(1.05);
+    }
+    .result {
+      margin-top: 40px;
+      display: none;
+    }
+    .video-card {
+      background: #fff;
+      width: 80%;
+      margin: 0 auto;
+      padding: 20px;
+      border-radius: 15px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    .video-card img {
+      max-width: 100%;
+      border-radius: 12px;
+      margin-bottom: 15px;
+    }
+    .video-card h3 {
+      margin: 10px 0;
+      font-size: 1.2rem;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 15px;
+    }
+    table th, table td {
+      border: 1px solid #ddd;
+      padding: 10px;
+    }
+    table th {
+      background: #00c896;
+      color: white;
+    }
+    table tr:hover {
+      background: #f1f1f1;
+    }
+    footer {
+      margin-top: 60px;
+      padding: 20px;
+      background: #333;
+      color: #aaa;
+      font-size: 0.9rem;
+    }
+    footer a {
+      color: #00c896;
+      text-decoration: none;
+      margin: 0 10px;
+    }
+    /* 🔔 Notification Bar */
+    #notify {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      padding: 15px;
+      background: #4cafef;
+      color: white;
+      font-weight: bold;
+      text-align: center;
+      z-index: 1000;
+      animation: slideDown 0.5s ease-out;
+    }
+    @keyframes slideDown {
+      from { transform: translateY(-100%); }
+      to { transform: translateY(0); }
+    }
   </style>
 </head>
 <body>
   <header>🌐 DanyVideo - Free Online Video Downloader</header>
+
+  <!-- 🔔 Notification Bar -->
+  <div id="notify">⬇️ Download Starting...</div>
   
   <div class="container">
     <form id="urlForm">
       <input type="text" id="url" placeholder="Enter the video URL...">
       <button type="submit">Get Video</button>
     </form>
-    
-    <div class="platforms">
-      <div class="platform"><img src="https://cdn-icons-png.flaticon.com/512/733/733547.png" alt="Facebook"></div>
-      <div class="platform"><img src="https://cdn-icons-png.flaticon.com/512/2111/2111463.png" alt="Instagram"></div>
-      <div class="platform"><img src="https://cdn-icons-png.flaticon.com/512/1384/1384060.png" alt="YouTube"></div>
-      <div class="platform"><img src="https://cdn-icons-png.flaticon.com/512/3046/3046127.png" alt="TikTok"></div>
+
+    <div class="result" id="resultBox">
+      <div class="video-card">
+        <img id="thumbnail" src="" alt="Video Thumbnail">
+        <h3 id="title"></h3>
+        <table>
+          <thead>
+            <tr>
+              <th>Quality</th>
+              <th>Format</th>
+              <th>Size (MB)</th>
+              <th>Download</th>
+            </tr>
+          </thead>
+          <tbody id="formatsList"></tbody>
+        </table>
+      </div>
     </div>
   </div>
 
-  <div id="videoInfo">
-    <h2 id="videoTitle"></h2>
-    <img id="videoThumb" width="320">
-    <div id="formatList"></div>
-  </div>
-
   <footer>
-    <p><a href="#">Terms of Service</a> | <a href="#">Privacy Policy</a> | <a href="#">FAQ</a></p>
+    <p>
+      <a href="#">Terms of Service</a> |
+      <a href="#">Privacy Policy</a> |
+      <a href="#">FAQ</a>
+    </p>
     <p>© 2025 DanyVideo.com — All rights reserved.</p>
   </footer>
 
@@ -60,30 +165,49 @@
     document.getElementById("urlForm").onsubmit = async (e) => {
       e.preventDefault();
       let url = document.getElementById("url").value;
-      let res = await fetch("/download", {
+
+      let response = await fetch("/get_info", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ url })
       });
-      let data = await res.json();
+
+      let data = await response.json();
 
       if (data.error) {
-        alert("❌ Error: " + data.error);
-      } else {
-        document.getElementById("videoInfo").style.display = "block";
-        document.getElementById("videoTitle").innerText = data.title;
-        document.getElementById("videoThumb").src = data.thumbnail;
-        let list = document.getElementById("formatList");
-        list.innerHTML = "";
-        data.formats.forEach(f => {
-          let item = document.createElement("a");
-          item.href = f.url;
-          item.innerText = `${f.format} (${f.ext})`;
-          item.className = "download-btn";
-          item.target = "_blank";
-          list.appendChild(item);
-        });
+        alert("Error: " + data.error);
+        return;
       }
+
+      document.getElementById("resultBox").style.display = "block";
+      document.getElementById("thumbnail").src = data.thumbnail;
+      document.getElementById("title").textContent = data.title;
+
+      let formatsList = document.getElementById("formatsList");
+      formatsList.innerHTML = "";
+
+      data.formats.forEach(f => {
+        let row = `
+          <tr>
+            <td>${f.resolution}</td>
+            <td>${f.ext}</td>
+            <td>${f.filesize ? f.filesize : "?"}</td>
+            <td><a href="${f.url}" class="dl-link" target="_blank">⬇️ Download</a></td>
+          </tr>
+        `;
+        formatsList.innerHTML += row;
+      });
+
+      // Attach click handler to each Download link
+      document.querySelectorAll(".dl-link").forEach(link => {
+        link.addEventListener("click", () => {
+          let notify = document.getElementById("notify");
+          notify.style.display = "block";
+          setTimeout(() => {
+            notify.style.display = "none";
+          }, 4000);
+        });
+      });
     };
   </script>
 </body>
