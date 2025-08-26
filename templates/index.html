@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DanyVideo - Free Online Video Downloader</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: #f9f9f9;
+      margin: 0;
+      padding: 0;
+      text-align: center;
+    }
+    header {
+      background: linear-gradient(90deg, #4cafef, #00c896);
+      color: white;
+      padding: 20px;
+      font-size: 1.5rem;
+      font-weight: 600;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+    }
+    .container {
+      margin-top: 40px;
+    }
+    input[type=text] {
+      width: 60%;
+      padding: 15px;
+      font-size: 1rem;
+      border: 2px solid #4cafef;
+      border-radius: 50px;
+      outline: none;
+      transition: 0.3s;
+    }
+    input[type=text]:focus {
+      border-color: #00c896;
+    }
+    button {
+      padding: 15px 30px;
+      margin-left: 10px;
+      background: #00c896;
+      color: white;
+      border: none;
+      border-radius: 50px;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+    button:hover {
+      background: #009f78;
+      transform: scale(1.05);
+    }
+    .platforms {
+      margin-top: 40px;
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+      flex-wrap: wrap;
+    }
+    .platform {
+      width: 100px;
+      height: 100px;
+      background: white;
+      border-radius: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+      transition: 0.3s;
+      cursor: pointer;
+    }
+    .platform:hover {
+      transform: translateY(-8px) scale(1.05);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.25);
+    }
+    .platform img {
+      width: 50px;
+      height: 50px;
+      animation: bounce 2s infinite;
+    }
+    @keyframes bounce {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-8px); }
+    }
+
+    /* Loader */
+    .loader {
+      border: 6px solid #f3f3f3;
+      border-top: 6px solid #4cafef;
+      border-radius: 50%;
+      width: 50px;
+      height: 50px;
+      margin: 20px auto;
+      animation: spin 1s linear infinite;
+      display: none;
+    }
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    /* Notification */
+    .notification {
+      position: fixed;
+      top: -60px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #00c896;
+      color: white;
+      padding: 15px 30px;
+      border-radius: 10px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+      font-weight: 600;
+      transition: 0.5s;
+      z-index: 9999;
+    }
+    .notification.error {
+      background: #e74c3c;
+    }
+    .notification.show {
+      top: 20px;
+    }
+
+    /* Results */
+    .results {
+      margin-top: 30px;
+      display: none;
+    }
+    .video-card {
+      background: white;
+      max-width: 500px;
+      margin: auto;
+      padding: 20px;
+      border-radius: 20px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      text-align: left;
+    }
+    .video-card img {
+      width: 100%;
+      border-radius: 15px;
+    }
+    .video-card h3 {
+      margin: 10px 0;
+      font-size: 1.2rem;
+    }
+    .formats button {
+      display: block;
+      width: 100%;
+      margin: 8px 0;
+      padding: 12px;
+      border-radius: 10px;
+      border: none;
+      cursor: pointer;
+      background: #4cafef;
+      color: white;
+      font-weight: bold;
+      transition: 0.3s;
+    }
+    .formats button:hover {
+      background: #009f78;
+    }
+  </style>
+</head>
+<body>
+  <header>🌐 DanyVideo - Free Online Video Downloader</header>
+
+  <div class="container">
+    <form id="urlForm">
+      <input type="text" id="url" placeholder="Enter the video URL...">
+      <button type="submit">Get Video</button>
+    </form>
+
+    <div class="loader" id="loader"></div>
+
+    <div class="platforms">
+      <div class="platform"><img src="https://cdn-icons-png.flaticon.com/512/733/733547.png" alt="Facebook"></div>
+      <div class="platform"><img src="https://cdn-icons-png.flaticon.com/512/2111/2111463.png" alt="Instagram"></div>
+      <div class="platform"><img src="https://cdn-icons-png.flaticon.com/512/1384/1384060.png" alt="YouTube"></div>
+      <div class="platform"><img src="https://cdn-icons-png.flaticon.com/512/3046/3046127.png" alt="TikTok"></div>
+    </div>
+
+    <div class="results" id="results">
+      <div class="video-card">
+        <img id="thumbnail" src="" alt="Video Thumbnail">
+        <h3 id="title"></h3>
+        <div class="formats" id="formats"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="notification" id="notification"></div>
+
+  <footer>
+    <p>
+      <a href="#">Terms of Service</a> |
+      <a href="#">Privacy Policy</a> |
+      <a href="#">FAQ</a>
+    </p>
+    <p>© 2025 DanyVideo.com — All rights reserved.</p>
+  </footer>
+
+  <script>
+    function showNotification(message, type="success") {
+      const notif = document.getElementById("notification");
+      notif.innerText = message;
+      notif.className = "notification show " + (type === "error" ? "error" : "");
+      setTimeout(() => notif.className = "notification", 3000);
+    }
+
+    document.getElementById("urlForm").onsubmit = async (e) => {
+      e.preventDefault();
+      let url = document.getElementById("url").value.trim();
+      if (!url) {
+        showNotification("Please enter a valid URL", "error");
+        return;
+      }
+
+      document.getElementById("loader").style.display = "block";
+      document.getElementById("results").style.display = "none";
+
+      try {
+        let res = await fetch("/fetch_info", {
+          method: "POST",
+          headers: {"Content-Type": "application/json"},
+          body: JSON.stringify({url})
+        });
+        let data = await res.json();
+        document.getElementById("loader").style.display = "none";
+
+        if (data.error) {
+          showNotification(data.error, "error");
+          return;
+        }
+
+        // Show results
+        document.getElementById("results").style.display = "block";
+        document.getElementById("thumbnail").src = data.thumbnail;
+        document.getElementById("title").innerText = data.title;
+
+        let formatsDiv = document.getElementById("formats");
+        formatsDiv.innerHTML = "";
+        data.formats.forEach(fmt => {
+          let btn = document.createElement("button");
+          btn.innerText = `${fmt.ext.toUpperCase()} ${fmt.resolution || fmt.abr || ""}`;
+          btn.onclick = async () => {
+            showNotification("Downloading...");
+            let dl = await fetch("/download", {
+              method: "POST",
+              headers: {"Content-Type": "application/json"},
+              body: JSON.stringify({url, format_id: fmt.format_id})
+            });
+            let blob = await dl.blob();
+            let a = document.createElement("a");
+            a.href = window.URL.createObjectURL(blob);
+            a.download = data.title + "." + fmt.ext;
+            a.click();
+            showNotification("Download Started ✅");
+          };
+          formatsDiv.appendChild(btn);
+        });
+
+      } catch (err) {
+        document.getElementById("loader").style.display = "none";
+        showNotification("Server error!", "error");
+      }
+    };
+  </script>
+</body>
+</html>
