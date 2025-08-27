@@ -1,8 +1,12 @@
-from flask import Flask, request, jsonify, Response
+from flask import Flask, request, jsonify, Response, render_template
 import os
 import yt_dlp
 
-app = Flask(__name__)
+app = Flask(__name__, template_folder='templates', static_folder='static')
+
+@app.route('/')
+def home():
+    return render_template('index.html')
 
 @app.route('/get_info', methods=['POST'])
 def get_info():
