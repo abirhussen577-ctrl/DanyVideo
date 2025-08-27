@@ -1,82 +1,80 @@
 document.getElementById("urlForm").onsubmit = async (e) => {
   e.preventDefault();
-
-  let url = document.getElementById("url").value.trim();
+  const url = document.getElementById("url").value.trim();
   if (!url) {
     showNotification("Please enter a valid URL!", "error");
     return;
   }
 
-  document.getElementById("result").innerHTML = `<p>⏳ Fetching video details...</p>`;
+  document.getElementById("resultBox").innerHTML = `<p>⏳ Fetching video details...</p>`;
 
   try {
-    let response = await fetch("/download", {
+    const response = await fetch("/get_info", {
       method: "POST",
-      headers: { "Content-Type": "application/x-www-form-urlencoded" },
-      body: "url=" + encodeURIComponent(url),
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ url }),
     });
 
-    let data = await response.json();
-
+    const data = await response.json();
     if (data.error) throw new Error(data.error);
 
-    let html = `
-      <div class="video-card">
-        <img src="${data.thumbnail}" alt="Thumbnail" class="thumbnail">
-        <h3>${data.title}</h3>
-        <p>Available Formats:</p>
-        <div class="formats">
-    `;
+    document.getElementById("resultBox").style.display = "block";
+    document.getElementById("thumbnail").src = data.thumbnail;
+    document.getElementById("title").textContent = data.title;
+
+    const formatsList = document.getElementById("formatsList");
+    formatsList.innerHTML = "";
 
     data.formats.forEach((f) => {
-      html += `
-        <button class="format-btn" onclick="downloadVideo('${data.url}', '${f.format_id}')">
-          ${f.resolution || "Unknown"} (${f.ext.toUpperCase()}) - ${f.filesize} MB
-        </button>
+      const row = `
+        <tr>
+          <td>${f.resolution}</td>
+          <td>${f.ext.toUpperCase()}</td>
+          <td>${f.filesize_mb || "Unknown"}</td>
+          <td><button class="format-btn" onclick="downloadVideo('${url}', '${f.format_id}', '${data.title}', '${f.ext}')">⬇️ Download</button></td>
+        </tr>
       `;
+      formatsList.innerHTML += row;
     });
-
-    html += `</div></div>`;
-    document.getElementById("result").innerHTML = html;
-
   } catch (err) {
-    document.getElementById("result").innerHTML = `<p style="color:red;">❌ Error: ${err.message}</p>`;
+    showNotification(`❌ Error: ${err.message}`, "error");
   }
 };
 
-async function downloadVideo(videoUrl, formatId) {
+async function downloadVideo(url, formatId, title, ext) {
   showNotification("⬇️ Download started...", "success");
 
-  let formData = new URLSearchParams();
-  formData.append("url", videoUrl);
-  formData.append("format_id", formatId);
+  try {
+    const formData = new URLSearchParams();
+    formData.append("url", url);
+    formData.append("format_id", formatId);
 
-  let response = await fetch("/download_file", {
-    method: "POST",
-    body: formData,
-  });
+    const response = await fetch("/download_file", {
+      method: "POST",
+      body: formData,
+    });
 
-  if (!response.ok) {
-    showNotification("❌ Download failed!", "error");
-    return;
+    if (!response.ok) throw new Error("Download failed");
+
+    const blob = await response.blob();
+    const filename = `${title.replace(/[\/\\]/g, '_')}.${ext}`;
+    const link = document.createElement("a");
+    link.href = URL.createObjectURL(blob);
+    link.download = filename;
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+  } catch (err) {
+    showNotification(`❌ Error: ${err.message}`, "error");
   }
-
-  let blob = await response.blob();
-  let link = document.createElement("a");
-  link.href = URL.createObjectURL(blob);
-  link.download = "video.mp4";
-  document.body.appendChild(link);
-  link.click();
-  link.remove();
 }
 
 function showNotification(message, type) {
-  let notif = document.createElement("div");
-  notif.className = "notification " + type;
-  notif.innerText = message;
-  document.body.appendChild(notif);
-
+  const notif = document.getElementById("notify");
+  notif.textContent = message;
+  notif.className = `notification ${type}`;
+  notif.style.display = "block";
   setTimeout(() => {
-    notif.remove();
+    notif.style.display = "none";
   }, 3000);
 }
