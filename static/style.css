@@ -5,23 +5,35 @@ body {
   padding: 0;
   text-align: center;
 }
+
 header {
   background: linear-gradient(90deg, #4cafef, #00c896);
   color: white;
   padding: 20px;
   font-size: 1.5rem;
   font-weight: 600;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
 }
-.container { margin-top: 50px; }
-input[type=text] {
-  width: 60%;
+
+.container {
+  margin-top: 50px;
+}
+
+input[type="text"] {
+  width: 90%;
+  max-width: 600px;
   padding: 15px;
   font-size: 1rem;
   border: 2px solid #4cafef;
   border-radius: 50px;
   outline: none;
+  transition: border-color 0.3s;
 }
+
+input[type="text"]:focus {
+  border-color: #00c896;
+}
+
 button {
   padding: 15px 30px;
   margin-left: 10px;
@@ -29,43 +41,125 @@ button {
   color: white;
   border: none;
   border-radius: 50px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background 0.3s, transform 0.3s;
+}
+
+button:hover {
+  background: #009f78;
+  transform: scale(1.05);
+}
+
+.result {
+  margin-top: 40px;
+  display: none;
+}
+
+.video-card {
+  background: #fff;
+  width: 90%;
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 20px;
+  border-radius: 15px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.video-card img {
+  max-width: 100%;
+  border-radius: 12px;
+  margin-bottom: 15px;
+}
+
+.video-card h3 {
+  margin: 10px 0;
+  font-size: 1.2rem;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 15px;
+}
+
+table th,
+table td {
+  border: 1px solid #ddd;
+  padding: 10px;
+}
+
+table th {
+  background: #00c896;
+  color: white;
+}
+
+table tr:hover {
+  background: #f1f1f1;
+}
+
+.format-btn {
+  background: #4cafef;
+  border: none;
+  padding: 8px 15px;
+  border-radius: 6px;
+  color: white;
   cursor: pointer;
 }
-button:hover { background: #009f78; transform: scale(1.05); }
-.platforms { margin-top: 40px; display: flex; justify-content: center; gap: 20px; flex-wrap: wrap; }
-.platform {
-  width: 100px; height: 100px; background: white;
-  border-radius: 20px; display: flex; align-items: center; justify-content: center;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.15);
-  transition: 0.3s; cursor: pointer;
+
+.format-btn:hover {
+  background: #009f78;
 }
-.platform:hover { transform: translateY(-8px) scale(1.05); }
-.platform img { width: 50px; height: 50px; animation: bounce 2s infinite; }
-@keyframes bounce { 0%,100%{transform:translateY(0);} 50%{transform:translateY(-8px);} }
-footer { margin-top: 60px; padding: 20px; background: #333; color: #aaa; font-size: 0.9rem; }
-footer a { color: #00c896; margin: 0 10px; }
+
 .notification {
-  position: fixed; top: 20px; right: 20px;
-  background: #00c896; color: white;
-  padding: 12px 20px; border-radius: 8px;
-  z-index: 9999; font-weight: bold;
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  background: #00c896;
+  color: white;
+  padding: 12px 20px;
+  border-radius: 8px;
+  z-index: 9999;
+  font-weight: bold;
   animation: fadeInOut 3s ease forwards;
 }
-.notification.error { background: #e74c3c; }
+
+.notification.error {
+  background: #e74c3c;
+}
+
 @keyframes fadeInOut {
-  0%{opacity:0; transform:translateY(-20px);}
-  10%{opacity:1; transform:translateY(0);}
-  90%{opacity:1;}
-  100%{opacity:0; transform:translateY(-20px);}
+  0% { opacity: 0; transform: translateY(-20px); }
+  10% { opacity: 1; transform: translateY(0); }
+  90% { opacity: 1; }
+  100% { opacity: 0; transform: translateY(-20px); }
 }
-.video-card {
-  margin-top: 20px; padding: 15px; background: white;
-  border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.15);
-  text-align: center;
+
+.warning {
+  color: #e74c3c;
+  margin-top: 20px;
+  font-size: 0.9rem;
 }
-.thumbnail { max-width: 300px; border-radius: 10px; margin-bottom: 10px; }
-.format-btn {
-  margin: 5px; padding: 10px 15px; border: none;
-  border-radius: 6px; background: #4cafef; color: white;
+
+footer {
+  margin-top: 60px;
+  padding: 20px;
+  background: #333;
+  color: #aaa;
+  font-size: 0.9rem;
 }
-.format-btn:hover { background: #009f78; }
+
+footer a {
+  color: #00c896;
+  text-decoration: none;
+  margin: 0 10px;
+}
+
+@media (max-width: 600px) {
+  input[type="text"] {
+    width: 100%;
+  }
+  button {
+    margin: 10px 0;
+  }
+}
