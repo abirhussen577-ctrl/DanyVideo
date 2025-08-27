@@ -1,214 +1,109 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>DanyVideo - Free Online Video Downloader</title>
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
-  <style>
-    body {
-      font-family: 'Poppins', sans-serif;
-      background: #f9f9f9;
-      margin: 0;
-      padding: 0;
-      text-align: center;
-    }
-    header {
-      background: linear-gradient(90deg, #4cafef, #00c896);
-      color: white;
-      padding: 20px;
-      font-size: 1.5rem;
-      font-weight: 600;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.2);
-    }
-    .container {
-      margin-top: 50px;
-    }
-    input[type=text] {
-      width: 60%;
-      padding: 15px;
-      font-size: 1rem;
-      border: 2px solid #4cafef;
-      border-radius: 50px;
-      outline: none;
-      transition: 0.3s;
-    }
-    input[type=text]:focus {
-      border-color: #00c896;
-    }
-    button {
-      padding: 15px 30px;
-      margin-left: 10px;
-      background: #00c896;
-      color: white;
-      border: none;
-      border-radius: 50px;
-      font-size: 1rem;
-      cursor: pointer;
-      transition: 0.3s;
-    }
-    button:hover {
-      background: #009f78;
-      transform: scale(1.05);
-    }
-    .platforms {
-      margin-top: 40px;
-      display: flex;
-      justify-content: center;
-      gap: 20px;
-      flex-wrap: wrap;
-    }
-    .platform {
-      width: 100px;
-      height: 100px;
-      background: white;
-      border-radius: 20px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.15);
-      transition: 0.3s;
-      cursor: pointer;
-    }
-    .platform:hover {
-      transform: translateY(-8px) scale(1.05);
-      box-shadow: 0 4px 12px rgba(0,0,0,0.25);
-    }
-    .platform img {
-      width: 50px;
-      height: 50px;
-      animation: bounce 2s infinite;
-    }
-    @keyframes bounce {
-      0%, 100% { transform: translateY(0); }
-      50% { transform: translateY(-8px); }
-    }
-    .preview {
-      margin-top: 40px;
-      display: none;
-    }
-    .preview img {
-      width: 320px;
-      border-radius: 12px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.2);
-    }
-    table {
-      margin: 20px auto;
-      border-collapse: collapse;
-      width: 80%;
-      max-width: 600px;
-    }
-    th, td {
-      padding: 12px;
-      border-bottom: 1px solid #ddd;
-      text-align: center;
-    }
-    th {
-      background: #00c896;
-      color: white;
-    }
-    tr:hover {
-      background: #f1f1f1;
-    }
-    footer {
-      margin-top: 60px;
-      padding: 20px;
-      background: #333;
-      color: #aaa;
-      font-size: 0.9rem;
-    }
-    footer a {
-      color: #00c896;
-      text-decoration: none;
-      margin: 0 10px;
-    }
-  </style>
-</head>
-<body>
-  <header>🌐 DanyVideo - Free Online Video Downloader</header>
-  
-  <div class="container">
-    <form id="urlForm">
-      <input type="text" id="url" placeholder="Enter the video URL...">
-      <button type="submit">Get Video</button>
-    </form>
-    
-    <div class="platforms">
-      <div class="platform"><img src="https://cdn-icons-png.flaticon.com/512/733/733547.png" alt="Facebook"></div>
-      <div class="platform"><img src="https://cdn-icons-png.flaticon.com/512/2111/2111463.png" alt="Instagram"></div>
-      <div class="platform"><img src="https://cdn-icons-png.flaticon.com/512/1384/1384060.png" alt="YouTube"></div>
-      <div class="platform"><img src="https://cdn-icons-png.flaticon.com/512/3046/3046127.png" alt="TikTok"></div>
-    </div>
+from flask import Flask, request, jsonify, Response
+import os
+import yt_dlp
 
-    <div class="preview" id="preview">
-      <h2 id="title"></h2>
-      <img id="thumbnail" src="" alt="Video Thumbnail">
-      <table id="formatsTable">
-        <thead>
-          <tr>
-            <th>Format</th>
-            <th>Resolution</th>
-            <th>Type</th>
-            <th>Download</th>
-          </tr>
-        </thead>
-        <tbody></tbody>
-      </table>
-    </div>
-  </div>
+app = Flask(__name__)
 
-  <footer>
-    <p>
-      <a href="#">Terms of Service</a> |
-      <a href="#">Privacy Policy</a> |
-      <a href="#">FAQ</a>
-    </p>
-    <p>© 2025 DanyVideo.com — All rights reserved.</p>
-  </footer>
+@app.route('/get_info', methods=['POST'])
+def get_info():
+    try:
+        data = request.get_json()
+        url = data.get("url", "").strip()
+        if not url:
+            return jsonify({"error": "No URL provided"}), 400
 
-  <script>
-    document.getElementById("urlForm").onsubmit = async (e) => {
-      e.preventDefault();
-      let url = document.getElementById("url").value;
+        # Detect which site it is and load cookies
+        cookies_file = None
+        if "youtube.com" in url or "youtu.be" in url:
+            cookies_file = "cookies/youtube.txt"
+        elif "facebook.com" in url:
+            cookies_file = "cookies/fb.txt"
+        elif "instagram.com" in url:
+            cookies_file = "cookies/ig.txt"
+        elif "tiktok.com" in url:
+            cookies_file = "cookies/tiktok.txt"
 
-      if (!url.trim()) {
-        alert("Please enter a video URL");
-        return;
-      }
-
-      try {
-        let response = await fetch("/download", {
-          method: "POST",
-          headers: { "Content-Type": "application/x-www-form-urlencoded" },
-          body: "url=" + encodeURIComponent(url)
-        });
-
-        let data = await response.json();
-
-        if (data.error) {
-          alert("Error: " + data.error);
-        } else {
-          document.getElementById("preview").style.display = "block";
-          document.getElementById("title").innerText = data.title;
-          document.getElementById("thumbnail").src = data.thumbnail;
-
-          let tbody = document.querySelector("#formatsTable tbody");
-          tbody.innerHTML = "";
-
-          data.formats.forEach(fmt => {
-            let row = `<tr>
-              <td>${fmt.format_id}</td>
-              <td>${fmt.resolution || 'Audio'}</td>
-              <td>${fmt.ext}</td>
-              <td><a href="${fmt.url}" target="_blank">Download</a></td>
-            </tr>`;
-            tbody.innerHTML += row;
-          });
+        ydl_opts = {
+            'quiet': True,
+            'skip_download': True,
+            'cookies': cookies_file if cookies_file and os.path.exists(cookies_file) else None,
         }
-      } catch (err) {
-        alert("Request failed: " + err);
-      }
-    };
-  </script>
-</body>
-</html>
+
+        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+            info = ydl.extract_info(url, download=False)
+
+        formats = []
+        for f in info.get("formats", []):
+            if not f.get("url"):
+                continue
+            filesize_mb = round(f.get("filesize", 0) / 1024 / 1024, 2) if f.get("filesize") else None
+            fmt = {
+                "format_id": f.get("format_id"),
+                "ext": f.get("ext"),
+                "resolution": f.get("format_note") or f.get("height") or "Unknown",
+                "filesize_mb": filesize_mb if filesize_mb else "Unknown",
+                "url": f.get("url")
+            }
+            formats.append(fmt)
+
+        # Sort formats from high to low quality
+        def sort_key(f):
+            res = f.get("resolution")
+            if isinstance(res, int):
+                return res
+            if isinstance(res, str) and res.isdigit():
+                return int(res)
+            if isinstance(res, str) and "p" in res:
+                try:
+                    return int(res.replace("p", ""))
+                except:
+                    return 0
+            return -1  # Audio or unknown formats go last
+
+        formats = sorted(formats, key=sort_key, reverse=True)
+
+        return jsonify({
+            "title": info.get("title"),
+            "thumbnail": info.get("thumbnail"),
+            "formats": formats
+        })
+
+    except yt_dlp.utils.DownloadError as e:
+        return jsonify({"error": f"Failed to fetch video: {str(e)}"}), 400
+    except Exception as e:
+        return jsonify({"error": f"Server error: {str(e)}"}), 500
+
+@app.route('/download_file', methods=['POST'])
+def download_file():
+    try:
+        data = request.form
+        url = data.get("url", "").strip()
+        format_id = data.get("format_id", "").strip()
+        if not url or not format_id:
+            return jsonify({"error": "URL or format ID missing"}), 400
+
+        ydl_opts = {
+            'quiet': True,
+            'format': format_id,
+            'outtmpl': '-',  # Stream to stdout
+            'cookies': "cookies/youtube.txt" if "youtube.com" in url or "youtu.be" in url else None,
+        }
+
+        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+            info = ydl.extract_info(url, download=False)
+            filename = f"{info.get('title', 'video')}.{info.get('ext', 'mp4')}".replace('/', '_').replace('\\', '_')
+            video_data = ydl.process_ie_result(info, download=True)
+
+        return Response(
+            video_data,
+            mimetype='video/mp4',
+            headers={"Content-Disposition": f"attachment; filename={filename}"}
+        )
+
+    except yt_dlp.utils.DownloadError as e:
+        return jsonify({"error": f"Download failed: {str(e)}"}), 400
+    except Exception as e:
+        return jsonify({"error": f"Server error: {str(e)}"}), 500
+
+if __name__ == '__main__':
+    app.run(debug=True)
