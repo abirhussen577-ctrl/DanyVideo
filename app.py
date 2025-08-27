@@ -12,7 +12,6 @@ def get_info():
         if not url:
             return jsonify({"error": "No URL provided"}), 400
 
-        # Detect which site it is and load cookies
         cookies_file = None
         if "youtube.com" in url or "youtu.be" in url:
             cookies_file = "cookies/youtube.txt"
@@ -46,7 +45,6 @@ def get_info():
             }
             formats.append(fmt)
 
-        # Sort formats from high to low quality
         def sort_key(f):
             res = f.get("resolution")
             if isinstance(res, int):
@@ -58,7 +56,7 @@ def get_info():
                     return int(res.replace("p", ""))
                 except:
                     return 0
-            return -1  # Audio or unknown formats go last
+            return -1
 
         formats = sorted(formats, key=sort_key, reverse=True)
 
@@ -106,4 +104,5 @@ def download_file():
         return jsonify({"error": f"Server error: {str(e)}"}), 500
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0',
+    import os
+    app.run(host='0.0.0.0', port=int(os.environ.get('PORT', 5000)))
