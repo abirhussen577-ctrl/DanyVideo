@@ -4,49 +4,151 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>DanyVideo - Free Online Video Downloader</title>
+
+  <!-- Favicon -->
+  <link rel="icon" href="{{ url_for('static', filename='icon.png') }}" type="image/png">
+
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/static/styles.css">
+  <style>
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: #f9f9f9;
+      margin: 0;
+      padding: 0;
+      text-align: center;
+    }
+    header {
+      background: linear-gradient(90deg, #4cafef, #00c896);
+      color: white;
+      padding: 20px;
+      font-size: 1.5rem;
+      font-weight: 600;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    header img {
+      height: 45px;
+      margin-right: 12px;
+      animation: spin 4s linear infinite;
+    }
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    .container {
+      margin-top: 50px;
+    }
+    input[type=text] {
+      width: 60%;
+      padding: 15px;
+      font-size: 1rem;
+      border: 2px solid #4cafef;
+      border-radius: 50px;
+      outline: none;
+      transition: 0.3s;
+    }
+    input[type=text]:focus {
+      border-color: #00c896;
+    }
+    button {
+      padding: 15px 30px;
+      margin-left: 10px;
+      background: #00c896;
+      color: white;
+      border: none;
+      border-radius: 50px;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+    button:hover {
+      background: #009f78;
+      transform: scale(1.05);
+    }
+    .platforms {
+      margin-top: 40px;
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+      flex-wrap: wrap;
+    }
+    .platform {
+      width: 100px;
+      height: 100px;
+      background: white;
+      border-radius: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+      transition: 0.3s;
+      cursor: pointer;
+    }
+    .platform:hover {
+      transform: translateY(-8px) scale(1.05);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.25);
+    }
+    .platform img {
+      width: 50px;
+      height: 50px;
+      animation: bounce 2s infinite;
+    }
+    @keyframes bounce {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-8px); }
+    }
+    footer {
+      margin-top: 60px;
+      padding: 20px;
+      background: #333;
+      color: #aaa;
+      font-size: 0.9rem;
+    }
+    footer a {
+      color: #00c896;
+      text-decoration: none;
+      margin: 0 10px;
+    }
+  </style>
 </head>
 <body>
-  <header>🌐 DanyVideo - Free Online Video Downloader</header>
-
-  <div id="notify" class="notification"></div>
-
+  <header>
+    <img src="{{ url_for('static', filename='logo.png') }}" alt="DanyVideo Logo">
+    🌐 DanyVideo - Free Online Video Downloader
+  </header>
+  
   <div class="container">
-    <form id="urlForm" aria-label="Video URL submission form">
-      <input type="text" id="url" placeholder="Enter the video URL..." aria-label="Video URL input" required>
+    <form id="urlForm">
+      <input type="text" id="url" placeholder="Enter the video URL...">
       <button type="submit">Get Video</button>
     </form>
-
-    <div class="result" id="resultBox">
-      <div class="video-card">
-        <img id="thumbnail" src="" alt="Video Thumbnail" aria-hidden="true">
-        <h3 id="title" aria-live="polite"></h3>
-        <table role="grid" aria-label="Available video formats">
-          <thead>
-            <tr>
-              <th scope="col">Quality</th>
-              <th scope="col">Format</th>
-              <th scope="col">Size (MB)</th>
-              <th scope="col">Download</th>
-            </tr>
-          </thead>
-          <tbody id="formatsList"></tbody>
-        </table>
-      </div>
+    
+    <div class="platforms">
+      <div class="platform"><img src="https://cdn-icons-png.flaticon.com/512/733/733547.png" alt="Facebook"></div>
+      <div class="platform"><img src="https://cdn-icons-png.flaticon.com/512/2111/2111463.png" alt="Instagram"></div>
+      <div class="platform"><img src="https://cdn-icons-png.flaticon.com/512/1384/1384060.png" alt="YouTube"></div>
+      <div class="platform"><img src="https://cdn-icons-png.flaticon.com/512/3046/3046127.png" alt="TikTok"></div>
     </div>
-    <p class="warning">⚠️ Downloading copyrighted content may violate platform terms of service.</p>
   </div>
 
   <footer>
     <p>
-      <a href="/terms">Terms of Service</a> |
-      <a href="/privacy">Privacy Policy</a> |
-      <a href="/faq">FAQ</a>
+      <a href="#">Terms of Service</a> |
+      <a href="#">Privacy Policy</a> |
+      <a href="#">FAQ</a>
     </p>
     <p>© 2025 DanyVideo.com — All rights reserved.</p>
   </footer>
 
-  <script src="/static/script.js"></script>
+  <script>
+    document.getElementById("urlForm").onsubmit = (e) => {
+      e.preventDefault();
+      let url = document.getElementById("url").value;
+      alert("Fetching formats for: " + url);
+      // Connect to Flask backend (/download endpoint)
+    };
+  </script>
 </body>
 </html>
