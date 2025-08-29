@@ -4,7 +4,7 @@ import os
 
 app = Flask(__name__)
 
-# cookies path define
+# আলাদা সাইটের জন্য cookies ফাইল path
 COOKIES = {
     "youtube.com": "cookies/youtube.txt",
     "youtu.be": "cookies/youtube.txt",
@@ -14,19 +14,15 @@ COOKIES = {
     "tiktok.com": "cookies/tiktok.txt",
 }
 
-
 def get_cookie_file(url):
     for domain, path in COOKIES.items():
-        if domain in url:
-            if os.path.exists(path):
-                return path
+        if domain in url and os.path.exists(path):
+            return path
     return None
-
 
 @app.route("/")
 def index():
     return render_template("index.html")
-
 
 @app.route("/download", methods=["POST"])
 def download():
@@ -70,7 +66,6 @@ def download():
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500
-
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000)
