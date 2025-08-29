@@ -4,71 +4,53 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>DanyVideo - Free Video Downloader</title>
-  <link rel="icon" href="{{ url_for('static', filename='icon.png') }}">
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
-
+  <link rel="icon" href="{{ url_for('static', filename='icon.png') }}" type="image/png">
   <style>
-    body { font-family: 'Poppins', sans-serif; background: #f9f9f9; margin:0; padding:0; text-align:center; }
-    header { background: linear-gradient(90deg, #4cafef, #00c896); color:white; padding:20px; font-size:1.5rem; font-weight:600; display:flex; justify-content:center; align-items:center; }
-    header img { height:45px; margin-right:10px; animation: spin 4s linear infinite; }
-    @keyframes spin { from{transform:rotate(0)} to{transform:rotate(360deg)} }
-    .container { margin-top:40px; }
-    input[type=text] { width:60%; padding:12px; border-radius:50px; border:2px solid #4cafef; }
-    button { padding:12px 25px; margin-left:10px; background:#00c896; border:none; color:white; border-radius:50px; cursor:pointer; }
+    body { font-family: Arial, sans-serif; text-align:center; margin:0; padding:0; background:#f8f8f8; }
+    header { background:#4cafef; color:white; padding:15px; font-size:22px; font-weight:bold; }
+    input { width:60%; padding:10px; border-radius:5px; border:1px solid #ccc; }
+    button { padding:10px 20px; background:#00c896; color:white; border:none; border-radius:5px; cursor:pointer; }
     button:hover { background:#009f78; }
-    #results { margin-top:30px; text-align:left; width:70%; margin-left:auto; margin-right:auto; }
-    .video-card { background:white; border-radius:15px; padding:20px; box-shadow:0 2px 6px rgba(0,0,0,0.2); }
-    .video-card img { width:200px; border-radius:10px; }
-    .formats a { display:block; margin:8px 0; padding:10px; background:#4cafef; color:white; text-decoration:none; border-radius:8px; text-align:center; }
-    .formats a:hover { background:#2196f3; }
+    #result { margin-top:30px; }
+    .format { margin:10px; padding:10px; border:1px solid #ddd; border-radius:5px; background:white; display:inline-block; }
   </style>
 </head>
 <body>
-  <header>
-    <img src="{{ url_for('static', filename='logo.png') }}" alt="Logo"> DanyVideo
-  </header>
-
-  <div class="container">
+  <header>🌐 DanyVideo - Free Video Downloader</header>
+  
+  <div style="margin-top:50px;">
     <form id="urlForm">
       <input type="text" id="url" placeholder="Enter video URL...">
       <button type="submit">Get Video</button>
     </form>
-
-    <div id="results"></div>
   </div>
 
+  <div id="result"></div>
+
   <script>
-    document.getElementById("urlForm").addEventListener("submit", async (e) => {
+    document.getElementById("urlForm").onsubmit = async (e) => {
       e.preventDefault();
-      let url = document.getElementById("url").value;
-      if (!url) return;
-
-      document.getElementById("results").innerHTML = "<p>⏳ Fetching video info...</p>";
-
-      let res = await fetch("/api/getinfo", {
+      const url = document.getElementById("url").value;
+      document.getElementById("result").innerHTML = "⏳ Fetching video info...";
+      const res = await fetch("/download", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ url: url })
+        body: JSON.stringify({ url })
       });
-
-      let data = await res.json();
-
+      const data = await res.json();
       if (data.error) {
-        document.getElementById("results").innerHTML = `<p style="color:red">${data.error}</p>`;
+        document.getElementById("result").innerHTML = "❌ Error: " + data.error;
       } else {
-        let html = `
-          <div class="video-card">
-            <h2>${data.title}</h2>
-            <img src="${data.thumbnail}" alt="thumbnail">
-            <div class="formats">
-        `;
+        let html = `<h3>${data.title}</h3><img src="${data.thumbnail}" width="200"><br>`;
         data.formats.forEach(f => {
-          html += `<a href="/download?url=${encodeURIComponent(url)}&format_id=${f.format_id}">${f.format_note || f.resolution} (${f.ext})</a>`;
+          html += `<div class="format">
+            <b>${f.resolution || "Audio"}</b> (${f.ext}) 
+            <a href="${f.url}" target="_blank"><button>Download</button></a>
+          </div>`;
         });
-        html += "</div></div>";
-        document.getElementById("results").innerHTML = html;
+        document.getElementById("result").innerHTML = html;
       }
-    });
+    };
   </script>
 </body>
 </html>
